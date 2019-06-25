@@ -12,7 +12,7 @@ class CommandManager : ListenerAdapter() {
 
     companion object {
         private val log: Logger = LoggerFactory.getLogger(CommandManager::class.java)
-        private const val prefix = "::"
+        const val prefix = "::"
     }
 
     private val commands = hashMapOf<String, Command>()
