@@ -2,6 +2,8 @@ package com.frederikam.hackweek2019
 
 import com.frederikam.hackweek2019.cmd.Command
 import com.frederikam.hackweek2019.cmd.JoinCommand
+import com.frederikam.hackweek2019.cmd.PlayCommand
+import net.dv8tion.jda.api.events.StatusChangeEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -20,17 +22,22 @@ class CommandManager : ListenerAdapter() {
 
     init {
         commands["join"] = JoinCommand()
+        commands["play"] = PlayCommand()
     }
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
         if (event.author.isBot) return
-        val msg = event.message.contentRaw;
+        val msg = event.message.contentRaw
         if (!msg.startsWith(prefix)) return
         val ctx = CommandContext(jda, event.message)
-        val cmdName = msg.removePrefix(prefix).split(' ', limit = 1).firstOrNull() ?: return
+        val cmdName = msg.removePrefix(prefix).split(' ', limit = 2).firstOrNull() ?: return
         val cmd = commands[cmdName]
         log.info(msg)
         cmd ?: return
         cmd.invoke0(ctx)
+    }
+
+    override fun onStatusChange(event: StatusChangeEvent) {
+        log.info("Status change: ${event.oldStatus} -> ${event.newStatus}")
     }
 }

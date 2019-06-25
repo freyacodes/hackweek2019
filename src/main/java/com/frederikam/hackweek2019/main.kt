@@ -7,6 +7,7 @@ private val commandManager = CommandManager()
 fun main() {
     val jda = jdaBuilder().build()
     commandManager.jda = jda
+    jda.restart()
 }
 
 fun jdaBuilder() = DefaultShardManagerBuilder().apply {

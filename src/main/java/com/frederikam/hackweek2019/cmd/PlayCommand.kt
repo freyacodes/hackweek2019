@@ -23,9 +23,9 @@ class PlayCommand : Command {
 
     override fun CommandContext.invoke() {
         joinCommand.run { join() } ?: return // Ensure we join a channel first
-        val identifier = message.contentRaw.split(whitespace, limit = 1).getOrNull(1)?.trim()
+        val identifier = message.contentRaw.split(whitespace, limit = 2).getOrNull(1)?.trim()
         if (identifier == null) {
-            replyAsync("Proper usage:`${CommandManager.prefix}play <url>`")
+            replyAsync("Proper usage:\n`${CommandManager.prefix}play <url>`")
             return
         }
         val player = getOrCreatePlayer(this)
@@ -43,12 +43,12 @@ class PlayCommand : Command {
         }
 
         override fun trackLoaded(track: AudioTrack) {
-            context.replyAsync("Adding ${track.info.title.escapeAndDefuse()} to the player")
+            context.replyAsync("Adding **${track.info.title.escapeAndDefuse()}** to the player")
             player.queue(track)
         }
 
         override fun noMatches() {
-            context.replyAsync("Nothing fround for ${identifier.escapeAndDefuse()}")
+            context.replyAsync("Nothing fround for **${identifier.escapeAndDefuse()}**")
         }
 
         override fun playlistLoaded(playlist: AudioPlaylist) {
@@ -56,7 +56,7 @@ class PlayCommand : Command {
                 context.replyAsync("I'm too lazy to add search support")
                 return
             }
-            context.replyAsync("Adding ${playlist.name.escapeAndDefuse()} with `${playlist.tracks.size}` tracks.")
+            context.replyAsync("Adding **${playlist.name.escapeAndDefuse()}** with **${playlist.tracks.size}** tracks.")
             playlist.tracks.forEach { player.queue(it) }
         }
 
