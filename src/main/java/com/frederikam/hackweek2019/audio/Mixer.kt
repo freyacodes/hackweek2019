@@ -1,14 +1,14 @@
 package com.frederikam.hackweek2019.audio
 
-import com.sedmelluq.discord.lavaplayer.format.Pcm16AudioDataFormat.CODEC_NAME_BE
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 import java.nio.ByteOrder.BIG_ENDIAN
-import java.nio.ByteOrder.LITTLE_ENDIAN
 import kotlin.math.abs
 import kotlin.math.max
-
+private val log: Logger = LoggerFactory.getLogger(Mixer::class.java)
 /**
  * Original author: Sedmelluq
  * Heavily modified by Frederikam
@@ -17,7 +17,7 @@ import kotlin.math.max
  */
 class Mixer {
     private val inputFormat = StandardAudioDataFormats.DISCORD_PCM_S16_BE
-    private val mixBuffer: IntArray = IntArray(inputFormat.totalSampleCount() * 2)
+    private val mixBuffer: IntArray = IntArray(inputFormat.chunkSampleCount * 2)
     private val outputBuffer: ByteArray = ByteArray(inputFormat.totalSampleCount() * 4)
     private val wrappedOutput = ByteBuffer.wrap(outputBuffer).order(BIG_ENDIAN).asShortBuffer()
     private val previousMultiplier = Multiplier()
@@ -41,7 +41,7 @@ class Mixer {
 
         if (onlyFrame != null) {
             val inputBuffer = ByteBuffer.wrap(onlyFrame!!)
-                    .order(if (CODEC_NAME_BE == frame.format.codecName()) BIG_ENDIAN else LITTLE_ENDIAN)
+                    .order(BIG_ENDIAN)
                     .asShortBuffer()
 
             for (i in mixBuffer.indices) {
@@ -52,7 +52,7 @@ class Mixer {
         }
 
         val inputBuffer = ByteBuffer.wrap(data)
-                .order(if (CODEC_NAME_BE == frame.format.codecName()) BIG_ENDIAN else LITTLE_ENDIAN)
+                .order(BIG_ENDIAN)
                 .asShortBuffer()
 
         for (i in mixBuffer.indices) {
