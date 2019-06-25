@@ -1,5 +1,6 @@
 package com.frederikam.hackweek2019.audio
 
+import com.frederikam.hackweek2019.CommandContext
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager
 import com.sedmelluq.discord.lavaplayer.source.bandcamp.BandcampAudioSourceManager
@@ -18,4 +19,6 @@ val audioPlayerManager = DefaultAudioPlayerManager().apply {
 
 }
 val players = ConcurrentHashMap<Long, MixPlayer>()
-fun getOrCreatePlayer(guild: Long) = players.getOrPut(guild) { MixPlayer(audioPlayerManager, guild) }
+fun getOrCreatePlayer(context: CommandContext) = players.getOrPut(context.guild.idLong) {
+    MixPlayer(audioPlayerManager, context)
+}

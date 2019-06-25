@@ -10,6 +10,6 @@ class CommandManager : ListenerAdapter() {
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
         if (event.author.isBot) return
-        val ctx = CommandContext(event.message)
+        val ctx = CommandContext(jda, event.message)
     }
 }
