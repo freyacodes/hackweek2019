@@ -23,7 +23,7 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
     private val mixer = Mixer()
     val queue = ConcurrentLinkedQueue<AudioTrack>()
     val players = mutableListOf<AudioPlayer>().apply {
-        for (i in 1..16) {
+        for (i in 1..4) {
             add(audioPlayerManager.createPlayer())
         }
     }

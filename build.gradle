@@ -91,7 +91,7 @@ bootJar {
         copy {
             from 'build/libs/fip.jar'
             into 'build/libs'
-            rename {"sentinel-${rootProject.version}.jar"}
+            rename {"fip-${rootProject.version}.jar"}
         }
     }
 }
