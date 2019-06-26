@@ -18,14 +18,15 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
         private val log: Logger = LoggerFactory.getLogger(MixPlayer::class.java)
     }
 
+    val playing: Int get() = players.count { !it.isPaused && it.playingTrack != null }
     private val guildId = context.guild.idLong
     private val mixer = Mixer()
-    private val queue = ConcurrentLinkedQueue<AudioTrack>()
+    val queue = ConcurrentLinkedQueue<AudioTrack>()
     private val p1 = audioPlayerManager.createPlayer()
     private val p2 = audioPlayerManager.createPlayer()
     private val p3 = audioPlayerManager.createPlayer()
     private val p4 = audioPlayerManager.createPlayer()
-    private val players = listOf(p1, p2, p3, p4)
+    val players = listOf(p1, p2, p3, p4)
     private val providers = players.map { FrameProvider(it) }
     private val playerListener = PlayerListener()
     private var _boolean = false
