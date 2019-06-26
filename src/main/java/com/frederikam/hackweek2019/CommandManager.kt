@@ -22,6 +22,7 @@ class CommandManager : ListenerAdapter() {
     lateinit var jda: ShardManager
 
     init {
+        commands["help"] = HelpCommand()
         commands["join"] = JoinCommand()
         commands["play"] = PlayCommand()
         commands["p"] = commands["play"]!!
