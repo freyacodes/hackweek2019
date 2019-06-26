@@ -112,7 +112,7 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
 
         override fun onTrackEnd(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {
             log.info("${this@MixPlayer} finished playing $track with reason $endReason")
-            if (!endReason.mayStartNext) return
+            if (!endReason.mayStartNext && endReason != AudioTrackEndReason.STOPPED) return
             val newTrack = queue.poll()
             if (newTrack != null) player.playTrack(newTrack)
         }
