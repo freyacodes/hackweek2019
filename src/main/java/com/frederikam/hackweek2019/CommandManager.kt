@@ -10,6 +10,8 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.sharding.ShardManager
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.*
+import kotlin.math.absoluteValue
 
 class CommandManager : ListenerAdapter() {
 
@@ -18,6 +20,7 @@ class CommandManager : ListenerAdapter() {
         const val prefix = "::"
     }
 
+    private val random = Random()
     private val commands = hashMapOf<String, Command>()
     lateinit var jda: ShardManager
 
@@ -42,7 +45,14 @@ class CommandManager : ListenerAdapter() {
         val cmd = commands[cmdName]
         log.info(msg)
         cmd ?: return
-        cmd.invoke0(ctx)
+
+        try {
+            cmd.invoke0(ctx)
+        } catch (e: Exception) {
+            val code = Random().nextInt().absoluteValue
+            log.error("Exception during command invocation. Ref=$code", e)
+            ctx.replyAsync("An error occurred! Reference code `$code`")
+        }
     }
 
     override fun onStatusChange(event: StatusChangeEvent) {
