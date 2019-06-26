@@ -2,13 +2,11 @@ package com.frederikam.hackweek2019.audio
 
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 import java.nio.ByteOrder.BIG_ENDIAN
 import kotlin.math.abs
 import kotlin.math.max
-private val log: Logger = LoggerFactory.getLogger(Mixer::class.java)
+
 /**
  * Original author: Sedmelluq
  * Heavily modified by Frederikam

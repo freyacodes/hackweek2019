@@ -12,29 +12,14 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.ByteBuffer
 import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
 
 class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext) : AudioSendHandler {
-
     companion object {
-        /** 2 seconds of 20ms frames */
-        private const val MAX_BUFFER_SIZE = (1000 / 20) * 2
-        /** Ignore players falling behind if the buffer is shorter than this */
-        private const val LOW_BUFFER_THRESHOLD = 400 / 20
-        /** Affects how often the buffer is refilled */
-        private const val BUFFER_REFILL_DELAY_MS = 250L
         private val log: Logger = LoggerFactory.getLogger(MixPlayer::class.java)
     }
 
-    private val jda = context.jda
     private val guildId = context.guild.idLong
-    private val guild get() = jda.getGuildById(guildId)
-    private val buffer = ConcurrentLinkedQueue<ByteBuffer>() // 20ms each
-    private val executor = Executors.newSingleThreadScheduledExecutor { r ->
-        Thread(r, "mixer-$guild").apply { isDaemon = true }
-    }
-
+    private val mixer = Mixer()
     private val queue = ConcurrentLinkedQueue<AudioTrack>()
     private val p1 = audioPlayerManager.createPlayer()
     private val p2 = audioPlayerManager.createPlayer()
@@ -42,7 +27,6 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
     private val p4 = audioPlayerManager.createPlayer()
     private val players = listOf(p1, p2, p3, p4)
     private val providers = players.map { FrameProvider(it) }
-    private val mixer = Mixer()
     private val playerListener = PlayerListener()
     private var _boolean = false
     var paused: Boolean
@@ -51,22 +35,28 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
             _boolean = value
             players.forEach { it.isPaused = value }
         }
+    private var lastData: ByteArray? = null
 
     init {
         context.guild.audioManager.sendingHandler = this
         players.forEach {
             it.addListener(playerListener)
         }
-        executor.scheduleAtFixedRate(::doMix, BUFFER_REFILL_DELAY_MS, BUFFER_REFILL_DELAY_MS, TimeUnit.MILLISECONDS)
     }
 
-    override fun provide20MsAudio() = buffer.remove()!!
-    override fun canProvide() = buffer.isNotEmpty()
-    override fun isOpus() = false
+    private fun getData(): ByteArray? {
+        mixer.reset()
 
-    fun destroy() {
-        executor.shutdown()
-        players.forEach { it.destroy() }
+        for (sound in providers) {
+            val frame = sound.player.provide()
+
+            if (frame != null) {
+                mixer.add(frame)
+            } else {
+            }
+        }
+
+        return mixer.get()
     }
 
     fun queue(track: AudioTrack) {
@@ -75,6 +65,30 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
             return
         }
         queue.add(track)
+    }
+
+    override fun canProvide(): Boolean {
+        checkFrameData()
+        return lastData != null
+    }
+
+    override fun provide20MsAudio(): ByteBuffer? {
+        checkFrameData()
+
+        val data = lastData
+        lastData = null
+
+        return ByteBuffer.wrap(data!!)
+    }
+
+    override fun isOpus(): Boolean {
+        return false
+    }
+
+    private fun checkFrameData() {
+        if (lastData == null) {
+            lastData = getData()
+        }
     }
 
     inner class PlayerListener : AudioEventAdapter() {
@@ -94,39 +108,7 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
         }
     }
 
-    private fun doMix() {
-        try {
-            val active = providers.filter { it.player.playingTrack != null }
-            log.info("Mixing ${active.size} players")
-            for (approxBufferSize in buffer.size..MAX_BUFFER_SIZE) {
-                val stop = mixLoop(active, approxBufferSize)
-                if (stop) break
-            }
-            log.info("Stopped mixing")
-        } catch (e: Exception) {
-            log.error("Exception while mixing", e)
-        }
-    }
-
-    private fun mixLoop(active: List<FrameProvider>, approxBufferSize: Int): Boolean {
-        val missingFrames = active.any { !it.canProvide() }
-        if (missingFrames) {
-            val isBufferLow = approxBufferSize < LOW_BUFFER_THRESHOLD
-            if (!isBufferLow) {
-                log.warn("Nulled packet")
-                return true
-            }
-        }
-
-        mixer.reset()
-        active.forEach {
-            val frame = it.provide() ?: return@forEach
-            mixer.add(frame)
-        }
-
-        val mixed = mixer.get() ?: return false
-        buffer.add(ByteBuffer.wrap(mixed))
-
-        return false
+    override fun toString(): String {
+        return "MixPlayer[$guildId]"
     }
 }
