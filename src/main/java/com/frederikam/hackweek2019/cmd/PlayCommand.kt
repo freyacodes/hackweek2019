@@ -19,12 +19,11 @@ class PlayCommand : Command {
         private val log: Logger = LoggerFactory.getLogger(PlayCommand::class.java)
     }
     private val joinCommand = JoinCommand()
-    private val whitespace = "\\s".toRegex()
 
     override fun CommandContext.invoke() {
         joinCommand.run { join() } ?: return // Ensure we join a channel first
-        val identifier = message.contentRaw.split(whitespace, limit = 2).getOrNull(1)?.trim()
-        if (identifier == null) {
+        val identifier = prefixStripped
+        if (identifier.isEmpty()) {
             replyAsync("Proper usage:\n`${CommandManager.prefix}play <url>`")
             return
         }
