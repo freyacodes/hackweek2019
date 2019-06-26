@@ -1,10 +1,7 @@
 
 buildscript {
     ext.kotlin_version = '1.3.40'
-    ext {
-        kotlin_version = '1.3.40'
-        bootVersion = '2.0.1.RELEASE'
-    }
+    ext.shadowVersion = '4.0.2'
 
     repositories {
         mavenCentral()
@@ -14,7 +11,7 @@ buildscript {
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-allopen:$kotlin_version"
-        classpath "org.springframework.boot:spring-boot-gradle-plugin:$bootVersion"
+        classpath "com.github.jengelman.gradle.plugins:shadow:$shadowVersion"
     }
 }
 
@@ -22,7 +19,7 @@ apply plugin: 'java'
 apply plugin: 'kotlin'
 apply plugin: "kotlin-spring"
 apply plugin: "maven"
-apply plugin: 'org.springframework.boot'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 group 'com.frederikam'
 version '1.0'
@@ -62,39 +59,12 @@ compileTestKotlin {
     }
 }
 
-bootRun {
-    //compiling tests during bootRun increases the likelihood of catching broken tests locally instead of on the CI
-    dependsOn compileTestJava
-
-    //pass in custom jvm args
-    // source: https://stackoverflow.com/a/25079415
-    // example: ./gradlew bootRun -PjvmArgs="--illegal-access=debug -Dwhatever=value"
-    if (project.hasProperty('jvmArgs')) {
-        jvmArgs project.jvmArgs.split('\\s+')
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.frederikam.hackweek2019.MainKt'
     }
 }
 
-bootJar {
-    archiveName = "fip.jar"
-    springBoot {
-        // Required for kotlin eval
-        requiresUnpack '**/kotlin-*.jar'
-    }
-    doLast {
-        //copies the jar into a place where the Dockerfile can find it easily (and users maybe too)
-        copy {
-            from 'build/libs/fip.jar'
-            into '.'
-        }
-
-        // For publishing
-        copy {
-            from 'build/libs/fip.jar'
-            into 'build/libs'
-            rename {"fip-${rootProject.version}.jar"}
-        }
-    }
+shadowJar {
+    baseName = 'fip'
 }
-
-// Makes sure JitPack packages the jar
-install.dependsOn bootJar
