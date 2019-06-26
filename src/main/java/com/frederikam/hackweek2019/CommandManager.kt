@@ -1,7 +1,10 @@
 package com.frederikam.hackweek2019
 
+import com.frederikam.hackweek2019.audio.destroyPlayer
 import com.frederikam.hackweek2019.cmd.*
 import net.dv8tion.jda.api.events.StatusChangeEvent
+import net.dv8tion.jda.api.events.guild.GuildJoinEvent
+import net.dv8tion.jda.api.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -26,6 +29,7 @@ class CommandManager : ListenerAdapter() {
         commands["list"] = commands["np"]!!
         commands["skip"] = SkipCommand()
         commands["s"] = commands["skip"]!!
+        commands["stop"] = StopCommand()
     }
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
@@ -42,5 +46,14 @@ class CommandManager : ListenerAdapter() {
 
     override fun onStatusChange(event: StatusChangeEvent) {
         log.info("Status change: ${event.oldStatus} -> ${event.newStatus}")
+    }
+
+    override fun onGuildJoin(event: GuildJoinEvent) {
+        log.info("Joined ${event.guild}")
+    }
+
+    override fun onGuildLeave(event: GuildLeaveEvent) {
+        log.info("Left ${event.guild}")
+        destroyPlayer(event.guild.idLong)
     }
 }

@@ -97,6 +97,14 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
             .map { it.stopTrack() }
             .count()
 
+    fun destroy() {
+        players.forEach { it.destroy() }
+    }
+
+    override fun toString(): String {
+        return "MixPlayer[$guildId]"
+    }
+
     inner class PlayerListener : AudioEventAdapter() {
         override fun onTrackException(player: AudioPlayer, track: AudioTrack, exception: FriendlyException) {
             log.error("Exception while playing $track", exception)
@@ -112,9 +120,5 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
         override fun onTrackStart(player: AudioPlayer, track: AudioTrack) {
             log.info("${this@MixPlayer} started playing $track")
         }
-    }
-
-    override fun toString(): String {
-        return "MixPlayer[$guildId]"
     }
 }

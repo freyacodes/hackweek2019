@@ -22,3 +22,6 @@ val players = ConcurrentHashMap<Long, MixPlayer>()
 fun CommandContext.getOrCreatePlayer(): MixPlayer = players.getOrPut(this.guild.idLong) {
     MixPlayer(audioPlayerManager, this)
 }
+fun destroyPlayer(guildId: Long) {
+    players.remove(guildId)?.destroy()
+}
