@@ -22,11 +22,11 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
     private val guildId = context.guild.idLong
     private val mixer = Mixer()
     val queue = ConcurrentLinkedQueue<AudioTrack>()
-    private val p1 = audioPlayerManager.createPlayer()
-    private val p2 = audioPlayerManager.createPlayer()
-    private val p3 = audioPlayerManager.createPlayer()
-    private val p4 = audioPlayerManager.createPlayer()
-    val players = listOf(p1, p2, p3, p4)
+    val players = mutableListOf<AudioPlayer>().apply {
+        for (i in 1..16) {
+            add(audioPlayerManager.createPlayer())
+        }
+    }
     private val providers = players.map { FrameProvider(it) }
     private val playerListener = PlayerListener()
     private var _boolean = false
@@ -91,6 +91,11 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
             lastData = getData()
         }
     }
+
+    fun skip(range: IntRange): Int = players
+            .filterIndexed { i, p -> range.contains(i) && p.playingTrack != null }
+            .map { it.stopTrack() }
+            .count()
 
     inner class PlayerListener : AudioEventAdapter() {
         override fun onTrackException(player: AudioPlayer, track: AudioTrack, exception: FriendlyException) {

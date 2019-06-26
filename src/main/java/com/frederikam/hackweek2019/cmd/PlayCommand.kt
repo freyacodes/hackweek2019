@@ -28,7 +28,7 @@ class PlayCommand : Command {
             replyAsync("Proper usage:\n`${CommandManager.prefix}play <url>`")
             return
         }
-        val player = getOrCreatePlayer(this)
+        val player = getOrCreatePlayer()
         audioPlayerManager.loadItem(identifier, AudioLoader(this, player, identifier))
     }
 

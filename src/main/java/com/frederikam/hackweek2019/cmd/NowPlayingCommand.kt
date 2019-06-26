@@ -7,7 +7,7 @@ import com.frederikam.hackweek2019.util.escapeAndDefuse
 class NowPlayingCommand : Command {
 
     override fun CommandContext.invoke() {
-        val player = getOrCreatePlayer(this)
+        val player = getOrCreatePlayer()
         if (player.playing == 0) {
             replyAsync("Not playing anything"); return
         }

@@ -11,6 +11,9 @@ data class CommandContext(val jda: ShardManager, val message: Message) {
     val channel: TextChannel get() = message.channel as TextChannel
     val invoker: Member get() = message.member!!
     val selfMember: Member get() = guild.selfMember
+    val prefixStripped: String by lazy {
+        message.contentRaw.split("\\s".toRegex(), limit = 2).getOrNull(1)?.trim() ?: ""
+    }
     fun replyAsync(text: String) {
         channel.sendMessage(text).queue()
     }

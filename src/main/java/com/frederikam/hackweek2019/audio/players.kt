@@ -19,6 +19,6 @@ val audioPlayerManager = DefaultAudioPlayerManager().apply {
 
 }
 val players = ConcurrentHashMap<Long, MixPlayer>()
-fun getOrCreatePlayer(context: CommandContext) = players.getOrPut(context.guild.idLong) {
-    MixPlayer(audioPlayerManager, context)
+fun CommandContext.getOrCreatePlayer(): MixPlayer = players.getOrPut(this.guild.idLong) {
+    MixPlayer(audioPlayerManager, this)
 }

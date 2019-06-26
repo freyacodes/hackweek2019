@@ -1,9 +1,6 @@
 package com.frederikam.hackweek2019
 
-import com.frederikam.hackweek2019.cmd.Command
-import com.frederikam.hackweek2019.cmd.JoinCommand
-import com.frederikam.hackweek2019.cmd.NowPlayingCommand
-import com.frederikam.hackweek2019.cmd.PlayCommand
+import com.frederikam.hackweek2019.cmd.*
 import net.dv8tion.jda.api.events.StatusChangeEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
@@ -27,6 +24,8 @@ class CommandManager : ListenerAdapter() {
         commands["p"] = commands["play"]!!
         commands["np"] = NowPlayingCommand()
         commands["list"] = commands["np"]!!
+        commands["skip"] = SkipCommand()
+        commands["s"] = commands["skip"]!!
     }
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
