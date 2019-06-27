@@ -29,12 +29,13 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
     }
     private val providers = players.map { FrameProvider(it) }
     private val playerListener = PlayerListener()
-    private var _boolean = false
+    private var _paused = false
     var paused: Boolean
-        get() = _boolean
+        get() = _paused
         set(value) {
-            _boolean = value
+            _paused = value
             players.forEach { it.isPaused = value }
+            log.info("$this set paused: $_paused")
         }
     private var lastData: ByteArray? = null
 
@@ -107,18 +108,18 @@ class MixPlayer(audioPlayerManager: AudioPlayerManager, context: CommandContext)
 
     inner class PlayerListener : AudioEventAdapter() {
         override fun onTrackException(player: AudioPlayer, track: AudioTrack, exception: FriendlyException) {
-            log.error("Exception while playing $track", exception)
+            log.error("Exception while playing ${track.info.title}", exception)
         }
 
         override fun onTrackEnd(player: AudioPlayer, track: AudioTrack, endReason: AudioTrackEndReason) {
-            log.info("${this@MixPlayer} finished playing $track with reason $endReason")
+            log.info("${this@MixPlayer} finished playing ${track.info.title} with reason $endReason")
             if (!endReason.mayStartNext && endReason != AudioTrackEndReason.STOPPED) return
             val newTrack = queue.poll()
             if (newTrack != null) player.playTrack(newTrack)
         }
 
         override fun onTrackStart(player: AudioPlayer, track: AudioTrack) {
-            log.info("${this@MixPlayer} started playing $track")
+            log.info("${this@MixPlayer} started playing ${track.info.title}")
         }
     }
 }

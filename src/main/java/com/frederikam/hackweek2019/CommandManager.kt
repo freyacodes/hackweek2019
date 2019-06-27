@@ -1,10 +1,14 @@
 package com.frederikam.hackweek2019
 
 import com.frederikam.hackweek2019.audio.destroyPlayer
+import com.frederikam.hackweek2019.audio.players
 import com.frederikam.hackweek2019.cmd.*
+import net.dv8tion.jda.api.entities.VoiceChannel
 import net.dv8tion.jda.api.events.StatusChangeEvent
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.dv8tion.jda.api.sharding.ShardManager
@@ -66,5 +70,20 @@ class CommandManager : ListenerAdapter() {
     override fun onGuildLeave(event: GuildLeaveEvent) {
         log.info("Left ${event.guild}")
         destroyPlayer(event.guild.idLong)
+    }
+
+    private val VoiceChannel.isOurs: Boolean get() = members.any { it.guild.selfMember == it }
+
+    override fun onGuildVoiceJoin(event: GuildVoiceJoinEvent) {
+        if (event.channelJoined.isOurs && !event.member.user.isBot) {
+            players[event.guild.idLong]?.paused = false
+        }
+    }
+
+    override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
+        if (event.channelLeft.isOurs
+                && !event.channelLeft.members.any { !it.user.isBot }) {
+            players[event.guild.idLong]?.paused = true
+        }
     }
 }
