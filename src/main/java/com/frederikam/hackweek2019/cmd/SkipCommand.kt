@@ -14,12 +14,15 @@ class SkipCommand : Command {
 
         val found = rangeRegex.find(prefixStripped)
         val skipped = if (found != null) {
-            val range = found.groups[1]!!.value.toInt()..found.groups[2]!!.value.toInt()
-            player.skip(range)
+            val from = found.groups[1]!!.value.toInt() - 1
+            val to   = found.groups[2]!!.value.toInt() - 1
+            player.skip(from..to)
         } else {
-            val num = numberRegex.find(prefixStripped)?.value?.toInt()
-            if (num != null) player.skip(num..num)
-            else 0
+            var num = numberRegex.find(prefixStripped)?.value?.toInt()
+            if (num != null) {
+                num--
+                player.skip(num..num)
+            }  else 0
         }
 
         if (skipped == 0) {

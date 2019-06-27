@@ -15,7 +15,7 @@ class NowPlayingCommand : Command {
         replyAsync(buildString {
             appendln("There are `${player.playing}/${player.players.size}` players are playing:")
             player.players.forEachIndexed { i, ap ->
-                append("`[$i]` ")
+                append("`[$i+1]` ")
                 val track = ap.playingTrack
                 if (track == null) appendln("(idle)")
                 else appendln("**${track.info.title.escapeAndDefuse()}**")
